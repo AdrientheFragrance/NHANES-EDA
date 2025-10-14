@@ -1,0 +1,26 @@
+---
+title: "project-1"
+author: "Adrien Rozario"
+date: "2025-10-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Install and load the NHANES package
+install.packages("NHANES")
+library(NHANES)
+```
+
+
+```{r}
+# Load the raw dataset
+data("NHANESraw")
+
+# See its structure
+str(NHANESraw)
+head(NHANESraw)
+summary(NHANESraw)
+```
+
