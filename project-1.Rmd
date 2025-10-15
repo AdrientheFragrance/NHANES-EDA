@@ -1,26 +1,211 @@
 ---
-title: "project-1"
-author: "Adrien Rozario"
-date: "2025-10-14"
+title: "DATA 350: Project 1 - Exploratory Data Analysis Report"
+author: "Group 11: Ademir Ferreyra, Jay Nadkarni, Adrien Rozario"
+date: "10/17/2025"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-# Install and load the NHANES package
-install.packages("NHANES")
+```{r}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(ggplot2)
 library(NHANES)
+library(forcats)
 ```
+## Introduction - Adrien
 
+From 2009 to 2012, the U.S. National Center for Health (NCHS) conducted The National Health and Nutrition Examination Survey (NHANES) with the goal of assessing public health trends, lifestyles, and illness risk factors across the U.S. population. For our exploratory data analysis, we will use the NHANESraw dataset from the NHANES R package, which was collected from the unweighted original survey responses from 20,293 participants.
+
+The purpose of this exploratory data analysis is to better understand how socioeconomic status, lifestyle choices, and demographic factors relate to overall health and well-being. Specifically, we aim to explore the following research questions:
+
+* How does socioeconomic status (education, poverty, home ownership, income) relate to smoking, alcohol, and drug use?
+
+* How do lifestyle choices (smoking, alcohol, and drug use) relate to self-rated health and sleep duration?
+
+* How do demographic factors (age, marital status, gender) influence or interact with these lifestyle and health outcomes?
+
+Key variables of interest include:
+
+* HHIncomeMid – midpoint of household income category (numeric)
+
+* Education – highest education level attained (categorical)
+
+* HomeOwn – home ownership status (categorical)
+
+* Poverty – family poverty income ratio (numeric)
+
+* SmokeNow, Smoke100 – indicators of smoking behavior
+
+* Alcohol12PlusYr, AlcoholDay, AlcoholYear – measures of alcohol use
+
+* HardDrugs – indicator of recreational drug use (if available)
+
+* HealthGen – self-rated general health (ordinal: Excellent–Poor)
+
+* SleepHrsNight – average hours of sleep per night (numeric)
+
+* Age, MaritalStatus, Gender – key demographic characteristics
+
+We expect that higher socioeconomic status is associated with lower rates of smoking and drug use, moderate alcohol consumption, and better health outcomes.
+
+<br>
+
+## Data Cleaning - Adrien
+
+Before conducting our exploratory analysis, we performed several data cleaning steps to ensure the quality and consistency of the NHANESraw dataset. These steps included handling missing values, converting variable types, addressing outliers, and stating key assumptions.
+
+### Missing Value Handling
+
+We began by examining the dataset for missing values using the summary() and colSums(is.na()) functions. Some demographic and lifestyle variables contained missing entries, especially those related to sensitive topics such as income and alcohol use.
+For essential demographic variables such as Gender, Age, and Education, we removed rows with missing values. For numeric variables like HHIncomeMid and SleepHrsNight, we used median imputation if the proportion of missing data was low. Variables with a high proportion of missing variables (over 50%) were excluded from the analysis.
 
 ```{r}
-# Load the raw dataset
+# Load data
 data("NHANESraw")
 
-# See its structure
-str(NHANESraw)
+# Preview
 head(NHANESraw)
-summary(NHANESraw)
+
+# Examine missing values
+colSums(is.na(NHANESraw))
+
+# Remove rows with missing essential demographic variables
+nhanes_clean <- NHANESraw %>%
+  filter(!is.na(Gender), !is.na(Age), !is.na(Education))
+
+# Median imputation for numeric variables with low amount of missing values
+nhanes_clean <- nhanes_clean %>%
+  mutate(
+    HHIncomeMid = ifelse(is.na(HHIncomeMid), median(HHIncomeMid, na.rm=TRUE), HHIncomeMid),
+    SleepHrsNight = ifelse(is.na(SleepHrsNight), median(SleepHrsNight, na.rm=TRUE), SleepHrsNight)
+  )
 ```
+### Type Conversions
+
+We then standardized variable types to ensure accurate analysis. Categorical variables such as SmokeNow, Gender, Education, and HomeOwn were converted to factors. Ordinal variables like HealthGen were stored as ordered factors to preserve their natural ranking. Numeric variables such as HHIncomeMid, Poverty, and SleepHrsNight were converted to numeric types.
+
+```{r}
+# Convert variables to appropriate types
+nhanes_clean <- nhanes_clean %>%
+  mutate(
+    SmokeNow = as.factor(SmokeNow),
+    Smoke100 = as.factor(Smoke100),
+    Gender = as.factor(Gender),
+    Education = as.factor(Education),
+    HomeOwn = as.factor(HomeOwn),
+    HealthGen = factor(HealthGen, levels = c("Excellent", "Very good", "Good", "Fair", "Poor"), ordered = TRUE),
+    HHIncomeMid = as.numeric(HHIncomeMid),
+    Poverty = as.numeric(Poverty),
+    SleepHrsNight = as.numeric(SleepHrsNight)
+  )
+```
+
+### Outlier Removal and Transformations
+
+To prevent extreme values from distorting results, we visualized the distributions of key numeric variables using histograms and boxplots. Implausible outliers were removed, such as participants reporting more than 16 hours of sleep or more than 20 alcoholic drinks per day. For skewed numeric variables such as income, we applied a log transformation to normalize the distribution.
+
+```{r}
+# Remove extreme outliers
+nhanes_clean <- nhanes_clean %>%
+  filter(SleepHrsNight <= 16, AlcoholDay <= 20)
+
+# Log-transform skewed variables
+nhanes_clean <- nhanes_clean %>%
+  mutate(HHIncomeMid_log = log(HHIncomeMid + 1))
+```
+
+### Assumptions
+
+During data cleaning, we made the following assumptions:
+* Missing values are not related to unobserved variables.
+* Median imputation provides a reasonable estimate of central tendency without introducing bias.
+* Outliers identified represent data entry errors or unrealistic responses rather than meaningful population extremes.
+* Ordinal variables (such as self-rated health) are consistently interpreted across respondents.
+* These cleaning steps prepared the dataset for accurate and meaningful exploratory data analysis.
+
+<br>
+
+## Univariate Analysis - Jay
+
+We began by exploring the distribution of individual variables to understand their distribution, central tendency, and potential outliers.
+
+### Summary statistics
+
+We calculated key descriptive statistics (mean, median, standard deviation, and interquartile range) for numeric variables such as HHIncomeMid, Poverty, AlcoholDay, AlcoholYear, and SleepHrsNight:
+
+```{r}
+summary_stats <- nhanes_clean %>%
+  select(HHIncomeMid, Poverty, AlcoholDay, AlcoholYear, SleepHrsNight) %>%
+  summary()
+summary_stats
+```
+These statistics provide an overview of socioeconomic and lifestyle patterns in the sample. 
+
+### Visualizations
+
+To visualize distributions, we created histograms and boxplots for both socioeconomic and lifestyle factors:
+* Histogram of Household Income Midpoints (log-transformed to reduce skew)
+* Boxplot of Sleep Duration by Self-Rated Health
+* Bar Plot of Smoking Status (SmokeNow)
+* Density Plot of AlcoholDay
+
+```{r}
+# Histogram of log-transformed household income
+ggplot(nhanes_clean, aes(x = HHIncomeMid_log)) +
+  geom_histogram(bins = 30, fill = "darkseagreen", color = "white") +
+  labs(title = "Histogram of Log-Transformed Household Income", x = "Log(HHIncomeMid)", y = "Count")
+
+# Boxplot of sleep duration by self-rated health
+ggplot(nhanes_clean, aes(x = HealthGen, y = SleepHrsNight)) +
+  geom_boxplot(fill = "lightsteelblue") +
+  labs(title = "Sleep Duration by Self-Rated Health", x = "Self-Rated Health", y = "Sleep Hours/Night")
+
+# Bar plot of smoking status
+ggplot(nhanes_clean, aes(x = SmokeNow)) +
+  geom_bar(fill = "burlywood") +
+  labs(title = "Smoking Status Distribution", x = "Smoke Now", y = "Count")
+
+# Density plot of alcohol consumption per day
+ggplot(nhanes_clean, aes(x = AlcoholDay)) +
+  geom_density(fill = "indianred", alpha = 0.5) +
+  labs(title = "Density of Daily Alcohol Consumption", x = "Alcohol per Day", y = "Density")
+```
+<br>
+
+## Bivariate / Multivariate Analysis (relationships between key variables) - Jay
+
+To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
+
+### Socioeconomic Status vs. Lifestyle Behaviors
+
+We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
+
+```{r}
+# Alcohol consumption by income group, faceted by smoking status
+ggplot(nhanes_clean, aes(x = HHIncomeMid_log, y = AlcoholDay)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~SmokeNow) +
+  labs(title = "Alcohol Consumption by Log Income Faceted by Smoking Status",
+       x = "Log(HHIncomeMid)", y = "Alcohol per Day")
+```
+
+### Demographic Influences
+
+Finally, we used a faceted plot to look at how age, gender, and marital status interact with health and lifestyle outcomes.
+
+```{r}
+# Faceted plot: Sleep by HealthGen across Age and Gender
+ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~MaritalStatus) +
+  labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
+```
+
+## Insights
+
+
+## Conclusion
+
+
+
 
