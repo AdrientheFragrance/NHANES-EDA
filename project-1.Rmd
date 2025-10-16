@@ -8,9 +8,11 @@ output: html_document
 ```{r}
 knitr::opts_chunk$set(echo = FALSE)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(NHANES)
 library(forcats)
+library(viridis)
 ```
 ## Introduction - Adrien
 
@@ -126,7 +128,7 @@ During data cleaning, we made the following assumptions:
 
 <br>
 
-## Univariate Analysis - Jay
+## Univariate Analysis
 
 We began by exploring the distribution of individual variables to understand their distribution and potential outliers.
 
@@ -140,28 +142,76 @@ summary_stats <- nhanes_clean %>%
   summary()
 summary_stats
 ```
+New variable groups:
+
+```{r}
+# IncomeGroup
+nhanes_clean <- nhanes_clean %>%
+  mutate(IncomeGroup = case_when(
+    HHIncomeMid < 25000 ~ "Low",
+    HHIncomeMid < 75000 ~ "Middle",
+    TRUE ~ "High"
+  ))
+
+# AlcoholGroup
+nhanes_clean <- nhanes_clean %>%
+  mutate(AlcoholGroup = case_when(
+    AlcoholDay == 0 ~ "None",
+    AlcoholDay <= 2 ~ "Light",
+    AlcoholDay <= 5 ~ "Moderate",
+    TRUE ~ "Heavy"
+  ))
+
+# Convert new vars to factors
+nhanes_clean <- nhanes_clean %>%
+  mutate(IncomeGroup = factor(IncomeGroup, levels=c("Low","Middle","High")),
+         AlcoholGroup = factor(AlcoholGroup, levels=c("None","Light","Moderate","Heavy")))
+
+# Combine NA and No Smoke responses
+nhanes_clean <- nhanes_clean %>%
+  mutate(SmokeNow = ifelse(is.na(SmokeNow) | SmokeNow == "No", "No", "Yes"),
+         SmokeNow = factor(SmokeNow, levels = c("No", "Yes")))
+```
+
 These statistics provide an overview of socioeconomic and lifestyle patterns in the sample. 
 
-### Visualizations
+### Bivariate / Multivariate Analysis (relationships between key variables) 
 
-To visualize distributions, we created histograms and boxplots for both socioeconomic and lifestyle factors:
-* Histogram of Household Income Midpoints (log-transformed to reduce skew)
-* Boxplot of Sleep Duration by Self-Rated Health
-* Bar Plot of Smoking Status (SmokeNow)
-* Density Plot of AlcoholDay
+To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
 
-```{r}
+*Q1: How does socioeconomic status relate to smoking, alcohol, and drug use?*
 
-```
+1. Bar plot of smoking rates by education level
 
 ```{r}
-# Boxplot of sleep duration by self-rated health
-
+ggplot(nhanes_clean, aes(x = Education, fill = SmokeNow)) +
+  geom_bar(position = "fill") +  # proportion within each group
+  scale_y_continuous(labels = scales::percent_format()) +  # show as %
+  scale_fill_manual(values = c("No" = "bisque2", "Yes" = "lightsalmon3")) +  # custom colors
+  labs(
+    title = "Proportion of Smokers by Education Level",
+    x = "Education Level",
+    y = "Percentage",
+    fill = "Currently Smokes"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+This bar plot shows that people who received 9-11th grade education are the most likely to be current smokers.
+
+2. Violin plot of alcohol consumption by income group
 
 ```{r}
-
+ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
+  geom_violin(fill = "indianred", alpha = 0.5) +
+  stat_summary(fun = median, geom = "point", size = 3, color = "indianred") +
+  labs(title = "Daily Alcohol Consumption by Income Group",
+       x = "Income Group", y = "Alcohol Drinks per Day") +
+  theme_minimal()
 ```
+This violin plot shows that more higher income people drink less alcohol, while lower income people drink more alcohol.
+
+3. Grouped bar plot of hard drug use by home ownership
 
 ```{r}
 
@@ -169,21 +219,30 @@ To visualize distributions, we created histograms and boxplots for both socioeco
 
 <br>
 
-## Bivariate / Multivariate Analysis (relationships between key variables) - Jay
+*Q2: How do lifestyle choices relate to self-rated health and sleep duration?*
 
-To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
-
-### Socioeconomic Status vs. Lifestyle Behaviors
-
-We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
+4. Violin plot of sleep duration by smoking status
 
 ```{r}
-
+unique(nhanes_clean)
+no <- c("No", "NA")
+g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
+g + geom_violin() + labs(x = "Smoking Status", y = "Average sleep duration", title = "Sleep Duration Based on Smoking Status")
 ```
 
-### Demographic Influences
+5. Box plot of self-rated health by alcohol consumption level
 
-Finally, we used a faceted plot to look at how age, gender, and marital status interact with health and lifestyle outcomes.
+```{r}
+g <- ggplot(nhanes_clean, aes(x = HealthGen, y = AlcoholYear))
+g + geom_boxplot() +
+  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Avg. Alcohol Use (years)") + scale_fill_viridis(discrete = T, alpha = 0.5)
+```
+
+<br>
+
+*Q3: How do demographic factors influence lifestyle and health outcomes?*
+
+6.  Faceted scatterplot of sleep duration vs. age by gender
 
 ```{r}
 # Faceted plot: Sleep by HealthGen across Age and Gender
@@ -192,7 +251,6 @@ ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
   facet_wrap(~MaritalStatus) +
   labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
 
-#comment
 ```
 
 ## Insights
