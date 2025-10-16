@@ -69,7 +69,7 @@ head(NHANESraw)
 # Examine missing values
 colSums(is.na(NHANESraw))
 
-# Remove rows with missing essential demographic variables
+# Remove rows with missing important demographic variables
 nhanes_clean <- NHANESraw %>%
   filter(!is.na(Gender), !is.na(Age), !is.na(Education))
 
@@ -80,6 +80,7 @@ nhanes_clean <- nhanes_clean %>%
     SleepHrsNight = ifelse(is.na(SleepHrsNight), median(SleepHrsNight, na.rm=TRUE), SleepHrsNight)
   )
 ```
+
 ### Type Conversions
 
 We then standardized variable types to ensure accurate analysis. Categorical variables such as SmokeNow, Gender, Education, and HomeOwn were converted to factors. Ordinal variables like HealthGen were stored as ordered factors to preserve their natural ranking. Numeric variables such as HHIncomeMid, Poverty, and SleepHrsNight were converted to numeric types.
@@ -127,7 +128,7 @@ During data cleaning, we made the following assumptions:
 
 ## Univariate Analysis - Jay
 
-We began by exploring the distribution of individual variables to understand their distribution, central tendency, and potential outliers.
+We began by exploring the distribution of individual variables to understand their distribution and potential outliers.
 
 ### Summary statistics
 
@@ -153,23 +154,30 @@ To visualize distributions, we created histograms and boxplots for both socioeco
 # Histogram of log-transformed household income
 ggplot(nhanes_clean, aes(x = HHIncomeMid_log)) +
   geom_histogram(bins = 30, fill = "darkseagreen", color = "white") +
-  labs(title = "Histogram of Log-Transformed Household Income", x = "Log(HHIncomeMid)", y = "Count")
+  labs(title = "Histogram of Household Income", x = "Household Income", y = "Count")
+```
 
+```{r}
 # Boxplot of sleep duration by self-rated health
 ggplot(nhanes_clean, aes(x = HealthGen, y = SleepHrsNight)) +
   geom_boxplot(fill = "lightsteelblue") +
   labs(title = "Sleep Duration by Self-Rated Health", x = "Self-Rated Health", y = "Sleep Hours/Night")
+```
 
+```{r}
 # Bar plot of smoking status
 ggplot(nhanes_clean, aes(x = SmokeNow)) +
   geom_bar(fill = "burlywood") +
   labs(title = "Smoking Status Distribution", x = "Smoke Now", y = "Count")
+```
 
+```{r}
 # Density plot of alcohol consumption per day
 ggplot(nhanes_clean, aes(x = AlcoholDay)) +
   geom_density(fill = "indianred", alpha = 0.5) +
   labs(title = "Density of Daily Alcohol Consumption", x = "Alcohol per Day", y = "Density")
 ```
+
 <br>
 
 ## Bivariate / Multivariate Analysis (relationships between key variables) - Jay
