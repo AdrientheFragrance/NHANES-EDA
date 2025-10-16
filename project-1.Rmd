@@ -86,6 +86,7 @@ We then standardized variable types to ensure accurate analysis. Categorical var
 
 ```{r}
 # Convert variables to appropriate types
+# comment by ademir
 nhanes_clean <- nhanes_clean %>%
   mutate(
     SmokeNow = as.factor(SmokeNow),
