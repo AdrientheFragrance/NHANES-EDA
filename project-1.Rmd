@@ -200,11 +200,13 @@ ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
   geom_point(alpha = 0.5) +
   facet_wrap(~MaritalStatus) +
   labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
+
+#comment
 ```
 
 ## Insights
 
-
+ 
 ## Conclusion
 
 
