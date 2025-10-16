@@ -151,34 +151,20 @@ To visualize distributions, we created histograms and boxplots for both socioeco
 * Density Plot of AlcoholDay
 
 ```{r}
-# Histogram of log-transformed household income
-ggplot(nhanes_clean, aes(x = HHIncomeMid_log)) +
-  geom_histogram(bins = 30, fill = "darkseagreen", color = "white") +
-  labs(title = "Histogram of Household Income", x = "Household Income", y = "Count")
+
 ```
 
 ```{r}
 # Boxplot of sleep duration by self-rated health
-ggplot(nhanes_clean, aes(x = HealthGen, y = SleepHrsNight)) +
-  geom_boxplot(fill = "lightsteelblue") +
-  labs(title = "Sleep Duration by Self-Rated Health", x = "Self-Rated Health", y = "Sleep Hours/Night")
+
 ```
 
 ```{r}
-# Bar plot of smoking status
-unique(nhanes_clean)
-smoking_status <- c("Yes", "No")
-ggplot(data = subset(nhanes_clean, SmokeNow %in% smoking_status),
-       aes(x = SmokeNow)) +
-  geom_bar() + 
-  labs(title = "Smoking Status Distribution", x = "Smoke Now", y = "Count")
+
 ```
 
 ```{r}
-# Density plot of alcohol consumption per day
-ggplot(nhanes_clean, aes(x = AlcoholDay)) +
-  geom_density(fill = "indianred", alpha = 0.5) +
-  labs(title = "Density of Daily Alcohol Consumption", x = "Alcohol per Day", y = "Density")
+
 ```
 
 <br>
@@ -192,12 +178,7 @@ To explore relationships between variables, we examined how socioeconomic status
 We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
 
 ```{r}
-# Alcohol consumption by income group, faceted by smoking status
-ggplot(nhanes_clean, aes(x = HHIncomeMid_log, y = AlcoholDay)) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~SmokeNow) +
-  labs(title = "Alcohol Consumption by Log Income Faceted by Smoking Status",
-       x = "Log(HHIncomeMid)", y = "Alcohol per Day")
+
 ```
 
 ### Demographic Influences
