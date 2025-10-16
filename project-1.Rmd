@@ -166,8 +166,11 @@ ggplot(nhanes_clean, aes(x = HealthGen, y = SleepHrsNight)) +
 
 ```{r}
 # Bar plot of smoking status
-ggplot(nhanes_clean, aes(x = SmokeNow)) +
-  geom_bar(fill = "burlywood") +
+unique(nhanes_clean)
+smoking_status <- c("Yes", "No")
+ggplot(data = subset(nhanes_clean, SmokeNow %in% smoking_status),
+       aes(x = SmokeNow)) +
+  geom_bar() + 
   labs(title = "Smoking Status Distribution", x = "Smoke Now", y = "Count")
 ```
 
@@ -207,11 +210,13 @@ ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
   geom_point(alpha = 0.5) +
   facet_wrap(~MaritalStatus) +
   labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
+
+#comment
 ```
 
 ## Insights
 
-
+ 
 ## Conclusion
 
 
