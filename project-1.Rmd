@@ -165,7 +165,6 @@ ggplot(nhanes_clean, aes(x = SmokeNow)) +
   geom_bar(fill = "burlywood") +
   labs(title = "Smoking Status Distribution", x = "Smoke Now", y = "Count")
 
-#testing git - comment made by ademir
 # Density plot of alcohol consumption per day
 ggplot(nhanes_clean, aes(x = AlcoholDay)) +
   geom_density(fill = "indianred", alpha = 0.5) +
