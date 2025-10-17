@@ -155,7 +155,6 @@ To visualize distributions, we created histograms and boxplots for both socioeco
 ```
 
 ```{r}
-# Boxplot of sleep duration by self-rated health
 
 ```
 
@@ -164,7 +163,12 @@ To visualize distributions, we created histograms and boxplots for both socioeco
 ```
 
 ```{r}
-
+#boxplot: sleep duration by smoking status - Ademir
+#group "no" and n/a together
+unique(nhanes_clean)
+no <- c("No", "NA")
+g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
+g + geom_violin() + labs(x = "Smoking Status", y = "Average sleep duration", title = "Sleep Duration Based on Smoking Status")
 ```
 
 <br>
@@ -178,7 +182,11 @@ To explore relationships between variables, we examined how socioeconomic status
 We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
 
 ```{r}
-
+# violin plot: self-rated health by alcohol consumption level
+library(viridis)
+g <- ggplot(nhanes_clean, aes(x = HealthGen, y = AlcoholYear))
+g + geom_boxplot() + ggthemes::theme_pander() +
+  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Avg. Alcohol Use (years)") + scale_fill_viridis(discrete = T, alpha = 0.5)
 ```
 
 ### Demographic Influences
