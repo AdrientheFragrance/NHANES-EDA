@@ -241,8 +241,10 @@ Across all groups, most respondents reported not using hard drugs, but ownership
 ```{r}
 unique(nhanes_clean)
 g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
-g + geom_violin(fill = "lightblue2", alpha = 0.7) + stat_summary(fun = median, geom = "point", size = 3, color = "lightblue4") + labs(x = "Smoking Status", y = "Average sleep duration", title = "Sleep Duration Based on Smoking Status") 
+g + geom_violin(fill = "lightblue2", alpha = 0.7) + stat_summary(fun = median, geom = "point", size = 3, color = "lightblue4") + labs(x = "Smoking Status", y = "Average Sleep Duration", title = "Sleep Duration Based on Smoking Status") 
 ```
+
+This graph reveals that the respondants who smoke have a similar sleeping schedule to those who smoke, seen by the median who both average moe than 7.0 hours. Apart from the density, the graph interestingly reveals that there is really not a significant difference in sleep reported by smokers and non-smokers. 
 
 5. Box plot of self-rated health by alcohol consumption level
 
@@ -255,7 +257,7 @@ g + geom_boxplot(alpha = 0.7) + coord_flip() + scale_fill_brewer(palette = "Spec
 
 ```
 
-<br>
+The boxplots reveal that people who reported to consume more alcohol per year reported themselves to be in "excellent" condition, this is noted by the median. Wherear people who consume less alcoholic beverages per year tend to report themselves to be in "poor" or "fair" conditions
 
 *Q3: How do demographic factors influence lifestyle and health outcomes?*
 
