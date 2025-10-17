@@ -273,6 +273,19 @@ g <- ggplot(subset(nhanes_clean, HealthGen %in% answered), aes(x = HealthGen, y 
 
 The boxplots reveal that people who reported to consume more alcohol per year reported themselves to be in "excellent" condition, this is noted by the median. Wherear people who consume less alcoholic beverages per year tend to report themselves to be in "poor" or "fair" conditions
 
+```{r}
+df <- nhanes_clean %>%
+  dplyr::mutate(
+    SmokeNow = ifelse(SmokeNow == "Yes", 1, 0),
+    HealthGen = as.numeric(factor(HealthGen, levels = c("Poor","Fair","Good","Very good","Excellent")))
+  ) %>%
+  dplyr::select(SleepHrsNight, AlcoholDay, SmokeNow, HealthGen) %>%
+  na.omit()
+
+corrplot::corrplot(cor(df), method = "color", col = colorRampPalette(c("white","black"))(200), type = "upper")
+```
+
+
 ### Q3: How do demographic factors influence lifestyle and health outcomes?
 
 *6.  Faceted scatter plot of sleep duration vs. age, faceted by gender and marital status*
