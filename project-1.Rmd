@@ -188,14 +188,6 @@ nhanes_clean <- nhanes_clean %>%
 
 These statistics provide an overview of socioeconomic and lifestyle patterns in the sample. 
 
-**Income (HHIncomeMid_log).** Most participants fall into the lower and middle income ranges, with only a small number earning at the very top end. This makes the original income data very right-skewed, but after applying a log transformation, the spread looks a lot better. The peaks in the histogram reflect how income was collected in grouped categories, yet overall the transformation makes it easier to see general income patterns without being pulled by a few extreme cases.
-
-**Sleep vs. Health (SleepHrsNight by HealthGen).** People who report being in poor health tend to sleep noticeably less on average, while those who rate their health as good or excellent usually get a bit more rest. There’s also wider variation among people with poorer health, hinting that their sleep routines may be less regular. This pattern supports the idea that consistent, sufficient sleep is often tied to better overall well-being.
-
-**Smoking (SmokeNow).** Among participants who answered, more people say they don’t currently smoke compared to those who do, which aligns with broader national declines in smoking. However, there’s also a large group of missing responses, likely individuals who skipped the question, given its sensitivity. Even so, the data show that most respondents are non-smokers, setting up useful comparisons for later lifestyle analyses.
-
-**Alcohol (AlcoholDay).** Most people in the sample drink little to no alcohol on a typical day, while a much smaller group reports heavier consumption. This creates a long right tail in the distribution. This is typical of real-world drinking patterns, where heavy use is uncommon but impactful. These differences in habits will be worth exploring further when we look at how alcohol use connects to health and socioeconomic factors.
-
 ### Bivariate / Multivariate Analysis (relationships between key variables) 
 
 To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
@@ -235,12 +227,19 @@ This violin plot shows that more higher income people drink less alcohol, while 
 3. Stacked bar plot of hard drug use by poverty level
 
 ```{r}
-ggplot(nhanes_clean, aes(x = PovertyGroup, fill = factor(HardDrugs))) +
+ggplot(
+  nhanes_clean %>% dplyr::filter(!is.na(PovertyGroup), !is.na(HardDrugs)),
+  aes(x = PovertyGroup, fill = HardDrugs)
+) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_manual(values = c("No" = "thistle", "Yes" = "plum4")) +
-  labs(title = "Hard Drug Use by Poverty Level",
-       x = "Poverty Group", y = "Proportion", fill = "Hard Drug Use") +
+  labs(
+    title = "Hard Drug Use by Poverty Level",
+    x = "Poverty Group",
+    y = "Proportion",
+    fill = "Hard Drug Use"
+  ) +
   theme_minimal()
 ```
 
@@ -299,6 +298,33 @@ ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
   labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
 
 ```
+
+
+```{r}
+ggplot(
+  nhanes_clean %>%
+    dplyr::filter(!is.na(MaritalStatus), !is.na(Age)) %>%
+    dplyr::mutate(
+      AgeGroup = dplyr::case_when(
+        Age < 30 ~ "0-30",
+        Age < 45 ~ "30–44",
+        Age < 60 ~ "45–59",
+        TRUE     ~ "60+"
+      )
+    ) %>%
+    dplyr::group_by(MaritalStatus, AgeGroup) %>%
+    dplyr::summarise(AvgAlcoholDay = mean(AlcoholDay, na.rm = TRUE), .groups = "drop"),
+  aes(x = MaritalStatus, y = AgeGroup, fill = AvgAlcoholDay)
+) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightblue", high = "black") +  # 0 → blue, high → black
+  labs(
+    title = "Average Daily Alcohol Use by Age Group and Marital Status",
+    x = "Marital Status", y = "Age Group", fill = "Avg Drinks/Day"
+  ) +
+  theme_minimal()
+```
+This heatmap shows how average daily alcohol use varies across age and marital status groups. Younger adults, especially those living with a partner or never married, tend to drink more on average, while adults aged 60 and older consistently report the lowest daily alcohol use. Overall, alcohol consumption decreases with age, but relationship status—particularly living with a partner—appears to have a strong influence on drinking habits.
 
 ## Insights
 
