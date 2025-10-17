@@ -236,14 +236,8 @@ fill = "Hard Drugs"
 )
 ```
 
+<<<<<<< HEAD
 Across all groups, most respondents reported not using hard drugs, but ownership status shows subtle differences. Renters and other living situations had slightly higher reported rates of drug use than homeowners. This pattern suggests that economic stability, reflected in home ownership, might be linked to lower likelihood of hard drug use.
-
-<br>
-
-*Q2: How do lifestyle choices relate to self-rated health and sleep duration?*
-
-4. Violin plot of sleep duration by smoking status
-
 ```{r}
 unique(nhanes_clean)
 g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
@@ -257,13 +251,34 @@ g + geom_violin(fill = "lightblue2", alpha = 0.7) + labs(x = "Smoking Status", y
 g <- ggplot(nhanes_clean ,aes(x = HealthGen, y = AlcoholYear))
 g + geom_boxplot(fill = "lightgreen", alpha = 0.7) + coord_flip() +
   labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Average Alcohol Use (years)") 
+
 ```
 
 <br>
 
 *Q3: How do demographic factors influence lifestyle and health outcomes?*
 
+<<<<<<< HEAD
 6.  Faceted scatterplot of sleep duration vs. age by gender
+=======
+To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
+
+### Socioeconomic Status vs. Lifestyle Behaviors
+
+We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
+
+```{r}
+# violin plot: self-rated health by alcohol consumption level
+library(viridis)
+g <- ggplot(nhanes_clean, aes(x = HealthGen, y = AlcoholYear))
+g + geom_boxplot() + ggthemes::theme_pander() +
+  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Avg. Alcohol Use (years)") + scale_fill_viridis(discrete = T, alpha = 0.5)
+```
+
+### Demographic Influences
+
+Finally, we used a faceted plot to look at how age, gender, and marital status interact with health and lifestyle outcomes.
+>>>>>>> 51838e22b285bdd5bc51c3da5f4996a2d3937ee6
 
 ```{r}
 # Faceted plot: Sleep by HealthGen across Age and Gender
