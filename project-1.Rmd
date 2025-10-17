@@ -171,6 +171,19 @@ nhanes_clean <- nhanes_clean %>%
 nhanes_clean <- nhanes_clean %>%
   mutate(SmokeNow = ifelse(is.na(SmokeNow) | SmokeNow == "No", "No", "Yes"),
          SmokeNow = factor(SmokeNow, levels = c("No", "Yes")))
+
+# Poverty groups
+nhanes_clean <- nhanes_clean %>%
+  mutate(PovertyGroup = ntile(Poverty, 3),
+         PovertyGroup = factor(PovertyGroup, labels=c("Low","Medium","High")))
+
+# Combine NA and No HardDrugs responses
+nhanes_clean <- nhanes_clean %>%
+  mutate(HardDrugs = case_when(
+    HardDrugs %in% c("No", "Other") ~ "No",
+    is.na(HardDrugs) ~ "No",
+    TRUE ~ HardDrugs
+  ))
 ```
 
 These statistics provide an overview of socioeconomic and lifestyle patterns in the sample. 
@@ -219,21 +232,16 @@ ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
 ```
 This violin plot shows that more higher income people drink less alcohol, while lower income people drink more alcohol.
 
-3. Stacked bar plot of hard drug use by home ownership
+3. Stacked bar plot of hard drug use by poverty level
 
 ```{r}
-df <- nhanes_clean %>%
-  tidyr::drop_na(HomeOwn, HardDrugs)
-
-ggplot(df, aes(x = HomeOwn, fill = HardDrugs)) +
-geom_bar(position = "fill") +
-scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
-labs(
-title = "Hard Drug Use by Home Ownership",
-x = "Home Ownership Status",
-y = "Percentage of Respondents",
-fill = "Hard Drugs"
-)
+ggplot(nhanes_clean, aes(x = PovertyGroup, fill = factor(HardDrugs))) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("No" = "thistle", "Yes" = "plum4")) +
+  labs(title = "Hard Drug Use by Poverty Level",
+       x = "Poverty Group", y = "Proportion", fill = "Hard Drug Use") +
+  theme_minimal()
 ```
 
 <<<<<<< HEAD
