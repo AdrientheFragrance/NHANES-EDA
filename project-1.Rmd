@@ -142,9 +142,12 @@ summary_stats <- nhanes_clean %>%
   summary()
 summary_stats
 ```
-New variable groups:
+
 
 ```{r}
+
+# Editing data
+
 # IncomeGroup
 nhanes_clean <- nhanes_clean %>%
   mutate(IncomeGroup = case_when(
@@ -184,17 +187,21 @@ nhanes_clean <- nhanes_clean %>%
     is.na(HardDrugs) ~ "No",
     TRUE ~ HardDrugs
   ))
+
+# Remove NA marital status
+nhanes_clean <- nhanes_clean %>%
+  filter(!is.na(MaritalStatus))
 ```
 
 These statistics provide an overview of socioeconomic and lifestyle patterns in the sample. 
 
-### Bivariate / Multivariate Analysis (relationships between key variables) 
+## Bivariate / Multivariate Analysis (relationships between key variables) 
 
 To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
 
-*Q1: How does socioeconomic status relate to smoking, alcohol, and drug use?*
+### Q1: How does socioeconomic status relate to smoking, alcohol, and drug use?
 
-1. Bar plot of smoking rates by education level
+*1. Bar plot of smoking rates by education level*
 
 ```{r}
 ggplot(nhanes_clean, aes(x = Education, fill = SmokeNow)) +
@@ -204,7 +211,7 @@ ggplot(nhanes_clean, aes(x = Education, fill = SmokeNow)) +
   labs(
     title = "Proportion of Smokers by Education Level",
     x = "Education Level",
-    y = "Percentage",
+    y = "Proportion of Group",
     fill = "Currently Smokes"
   ) +
   theme_minimal() +
@@ -212,7 +219,7 @@ ggplot(nhanes_clean, aes(x = Education, fill = SmokeNow)) +
 ```
 This bar plot shows that people who received 9-11th grade education are the most likely to be current smokers.
 
-2. Violin plot of alcohol consumption by income group
+*2. Violin plot of alcohol consumption by income group*
 
 ```{r}
 ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
@@ -224,7 +231,7 @@ ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
 ```
 This violin plot shows that more higher income people drink less alcohol, while lower income people drink more alcohol.
 
-3. Stacked bar plot of hard drug use by poverty level
+*3. Stacked bar plot of hard drug use by poverty level*
 
 ```{r}
 ggplot(
@@ -237,68 +244,42 @@ ggplot(
   labs(
     title = "Hard Drug Use by Poverty Level",
     x = "Poverty Group",
-    y = "Proportion",
+    y = "Proportion of Group",
     fill = "Hard Drug Use"
   ) +
   theme_minimal()
 ```
+This bar chart shows that while most people don't do hard drugs, more people in low poverty (more poverty) have recorded hard drug use.
 
-<<<<<<< HEAD
-Across all groups, most respondents reported not using hard drugs, but ownership status shows subtle differences. Renters and other living situations had slightly higher reported rates of drug use than homeowners. This pattern suggests that economic stability, reflected in home ownership, might be linked to lower likelihood of hard drug use.
+*4. Violin plot of sleep duration by smoking status*
+
 ```{r}
-unique(nhanes_clean)
 g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
 g + geom_violin(fill = "lightblue2", alpha = 0.7) + stat_summary(fun = median, geom = "point", size = 3, color = "lightblue4") + labs(x = "Smoking Status", y = "Average Sleep Duration", title = "Sleep Duration Based on Smoking Status") 
 ```
 
 This graph reveals that the respondants who smoke have a similar sleeping schedule to those who smoke, seen by the median who both average moe than 7.0 hours. Apart from the density, the graph interestingly reveals that there is really not a significant difference in sleep reported by smokers and non-smokers. 
 
-5. Box plot of self-rated health by alcohol consumption level
+*5. Box plot of self-rated health by alcohol consumption level*
 
 ```{r}
 answered <- c("Poor","Fair", "Good", "Excellent")
 
-g <- ggplot(subset(nhanes_clean, HealthGen %in% answered) ,aes(x = HealthGen, y = AlcoholYear, fill = HealthGen))
-g + geom_boxplot(alpha = 0.7) + coord_flip() + scale_fill_brewer(palette = "Spectral") +
-  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Average Alcohol Use (drinks per year)") + theme(legend.position = "none")
-
+g <- ggplot(subset(nhanes_clean, HealthGen %in% answered), aes(x = HealthGen, y = AlcoholYear, fill = HealthGen))
+    g + geom_boxplot(alpha = 0.7) + coord_flip() +  scale_fill_brewer(palette = "Spectral", direction = -1) +
+    labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Average
+    Alcohol Use (drinks per year)") + theme(legend.position = "none")
 ```
 
 The boxplots reveal that people who reported to consume more alcohol per year reported themselves to be in "excellent" condition, this is noted by the median. Wherear people who consume less alcoholic beverages per year tend to report themselves to be in "poor" or "fair" conditions
 
-*Q3: How do demographic factors influence lifestyle and health outcomes?*
+### Q3: How do demographic factors influence lifestyle and health outcomes?
 
-<<<<<<< HEAD
-6.  Faceted scatterplot of sleep duration vs. age by gender
-=======
+*6.  Faceted scatter plot of sleep duration vs. age, faceted by gender and marital status*
+
 To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
 
-### Socioeconomic Status vs. Lifestyle Behaviors
-
-We analyzed how income, education, and home ownership relate to smoking and alcohol use. For instance, we plotted alcohol consumption by income group, faceted by smoking status:
-
-```{r}
-# violin plot: self-rated health by alcohol consumption level
-library(viridis)
-g <- ggplot(nhanes_clean, aes(x = HealthGen, y = AlcoholYear))
-g + geom_boxplot() + ggthemes::theme_pander() +
-  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Avg. Alcohol Use (years)") + scale_fill_viridis(discrete = T, alpha = 0.5)
-```
-
-### Demographic Influences
-
-Finally, we used a faceted plot to look at how age, gender, and marital status interact with health and lifestyle outcomes.
->>>>>>> 51838e22b285bdd5bc51c3da5f4996a2d3937ee6
-
-```{r}
-# Faceted plot: Sleep by HealthGen across Age and Gender
-ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~MaritalStatus) +
-  labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
-
-```
-
+Heatmap of average daily alcohol use by age group and marital status *
 
 ```{r}
 ggplot(
@@ -317,14 +298,25 @@ ggplot(
   aes(x = MaritalStatus, y = AgeGroup, fill = AvgAlcoholDay)
 ) +
   geom_tile() +
-  scale_fill_gradient(low = "lightblue", high = "black") +  # 0 → blue, high → black
+  scale_fill_gradient(low = "indianred", high = "black") +  # 0 → red, high → black
   labs(
     title = "Average Daily Alcohol Use by Age Group and Marital Status",
-    x = "Marital Status", y = "Age Group", fill = "Avg Drinks/Day"
+    x = "Marital Status", y = "Age Group", fill = "Average Drinks Per Day"
   ) +
   theme_minimal()
 ```
+
 This heatmap shows how average daily alcohol use varies across age and marital status groups. Younger adults, especially those living with a partner or never married, tend to drink more on average, while adults aged 60 and older report the lowest daily alcohol use, regardless of marital status. Overall, alcohol consumption decreases with age, but relationship status—like living with a partner—appears to have a strong influence on drinking habits.
+
+*6. Faceted scatterplot (sleep duration by age, gender, and marital status)*
+
+```{r}
+ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
+  geom_point(alpha = 0.5) +
+  facet_wrap(~MaritalStatus) 
+  labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
+```
+This graph shows that married men sleep the most and women with live partners sleep the most.
 
 ## Insights
 
