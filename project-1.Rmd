@@ -172,6 +172,16 @@ ggplot(nhanes_clean, aes(x = AlcoholDay)) +
 ```
 <br>
 
+####Interpretations
+
+**Income (HHIncomeMid_log).** The distribution is strongly right-skewed on the raw scale and becomes approximately unimodal after log transformation, indicating a small number of very high-income households.
+
+**Sleep vs. Health (SleepHrsNight by HealthGen).** Median sleep declines as self-rated health worsens (Excellent → Poor), and variability increases in the lower-health groups, suggesting less consistent sleep among those reporting poorer health.
+
+**Smoking (SmokeNow).** The sample contains more non-smokers than current smokers, consistent with national trends; this will matter when we stratify by smoking later.
+
+**Alcohol (AlcoholDay).** The density shows a long right tail: most participants report low daily intake, with a small minority consuming substantially more.
+
 ## Bivariate / Multivariate Analysis (relationships between key variables) - Jay
 
 To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
