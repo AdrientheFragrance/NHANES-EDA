@@ -246,17 +246,17 @@ Across all groups, most respondents reported not using hard drugs, but ownership
 
 ```{r}
 unique(nhanes_clean)
-no <- c("No", "NA")
 g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
-g + geom_violin() + labs(x = "Smoking Status", y = "Average sleep duration", title = "Sleep Duration Based on Smoking Status")
+g + geom_violin(fill = "lightblue2", alpha = 0.7) + labs(x = "Smoking Status", y = "Average sleep duration", title = "Sleep Duration Based on Smoking Status") 
 ```
 
 5. Box plot of self-rated health by alcohol consumption level
 
 ```{r}
-g <- ggplot(nhanes_clean, aes(x = HealthGen, y = AlcoholYear))
-g + geom_boxplot() +
-  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Avg. Alcohol Use (years)") + scale_fill_viridis(discrete = T, alpha = 0.5)
+
+g <- ggplot(nhanes_clean ,aes(x = HealthGen, y = AlcoholYear))
+g + geom_boxplot(fill = "lightgreen", alpha = 0.7) + coord_flip() +
+  labs(title = "Distribution of self-related health by alcohol consumption level", x = "self-reported health", y = "Average Alcohol Use (years)") 
 ```
 
 <br>
