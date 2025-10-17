@@ -324,7 +324,7 @@ ggplot(
   ) +
   theme_minimal()
 ```
-This heatmap shows how average daily alcohol use varies across age and marital status groups. Younger adults, especially those living with a partner or never married, tend to drink more on average, while adults aged 60 and older consistently report the lowest daily alcohol use. Overall, alcohol consumption decreases with age, but relationship status—particularly living with a partner—appears to have a strong influence on drinking habits.
+This heatmap shows how average daily alcohol use varies across age and marital status groups. Younger adults, especially those living with a partner or never married, tend to drink more on average, while adults aged 60 and older report the lowest daily alcohol use, regardless of marital status. Overall, alcohol consumption decreases with age, but relationship status—like living with a partner—appears to have a strong influence on drinking habits.
 
 ## Insights
 
