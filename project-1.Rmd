@@ -219,11 +219,24 @@ ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
 ```
 This violin plot shows that more higher income people drink less alcohol, while lower income people drink more alcohol.
 
-3. Grouped bar plot of hard drug use by home ownership
+3. Stacked bar plot of hard drug use by home ownership
 
 ```{r}
+df <- nhanes_clean %>%
+  tidyr::drop_na(HomeOwn, HardDrugs)
 
+ggplot(df, aes(x = HomeOwn, fill = HardDrugs)) +
+geom_bar(position = "fill") +
+scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
+labs(
+title = "Hard Drug Use by Home Ownership",
+x = "Home Ownership Status",
+y = "Percentage of Respondents",
+fill = "Hard Drugs"
+)
 ```
+
+Across all groups, most respondents reported not using hard drugs, but ownership status shows subtle differences. Renters and other living situations had slightly higher reported rates of drug use than homeowners. This pattern suggests that economic stability, reflected in home ownership, might be linked to lower likelihood of hard drug use.
 
 <br>
 
