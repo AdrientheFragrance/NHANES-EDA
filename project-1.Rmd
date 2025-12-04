@@ -237,7 +237,8 @@ This bar plot shows that people who received 9-11th grade education are the most
 **2. Violin plot of alcohol consumption by income group**
 
 ```{r}
-ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
+ggplot(nhanes_clean %>% filter(AlcoholDay > 0), 
+       aes(x = IncomeGroup, y = AlcoholDay)) +
   geom_violin(fill = "indianred", alpha = 0.5) +
   stat_summary(fun = median, geom = "point", size = 3, color = "indianred") +
   labs(title = "Daily Alcohol Consumption by Income Group",
@@ -246,7 +247,9 @@ ggplot(nhanes_clean, aes(x = IncomeGroup, y = AlcoholDay)) +
 ```
 <br>
 
-We found that people with higher income consumed less alcohol, whereas lower-income people drank more. This is interesting because of the assumption that people who earn more money have easier access to alcoholic beverages. It comes to show that there could be other factors that explain why lower-income people are consuming more alcohol, such as lifestyle and mental health. We can also see that there were more high-income people who participated in the survey compared to lower-income students.
+Violin plots show both the distribution and density of the people in particular groups. In wider areas, more people fall within that range, and in narrower areas, less people fall within that range. In this plot, the low-income group has the narrowest shape, meaning fewer respondents overall, while the high-income group has the widest and most variable distribution.
+
+Despite having more high-income respondents, their violin cuts off at higher numbers of drinks per day, showing that they drink less on average. In contrast, the low and middle-income groups extend higher on the alcohol scale, indicating more frequent drinking. This suggests that income may relate to alcohol use in ways influenced by lifestyle or stress rather than access alone.
 
 <br>
 
@@ -283,7 +286,7 @@ g + geom_violin(fill = "lightblue2", alpha = 0.7) + stat_summary(fun = median, g
 
 <br>
 
-This violin plot shows that both smokers and non-smokers average around 7 hours of sleep per night. But, the non-smokers' plot has a wider shape, indicating that they are more likely to sleep the average healthy amount of hours than smokers. It is important to note that the the shapes of both violin plots are wiggly, and thus they are not perfectly reliable.
+This violin plot compares hours of sleep for smokers vs. non-smokers. Both groups average around 7 hours, but the non-smokers’ more irregular, wiggly violin suggests greater variation in their sleep patterns. Smokers show a slightly tighter distribution, suggesting more regular sleep patterns. Since both violins are uneven, the data may be limited and interpretation of the results should not be considered completely accurate.
 
 <br>
 
@@ -293,18 +296,18 @@ This violin plot shows that both smokers and non-smokers average around 7 hours 
 answered <- c("Poor","Fair", "Good", "Excellent")
 
 g <- ggplot(subset(nhanes_clean, HealthGen %in% answered), aes(x = HealthGen, y = AlcoholYear, fill = HealthGen))
-    g + geom_boxplot(alpha = 0.7) + coord_flip() +  scale_fill_brewer(palette = "Reds", direction = -1) +
+    g + geom_boxplot(alpha = 0.7) + coord_flip() +  scale_fill_brewer(palette = "YlGnBu", direction = -1) +
     labs(title = "Distribution of self-related health by alcohol consumption", x = "Self-Eeported Health", y = "Number of
     Days of Drinking Alcohol in the Past Year") + theme(legend.position = "none")
 ```
 
 <br>
 
-The boxplots reveal that people who consumed more alcohol per year report themselves to be in "excellent" condition; this is noted by the median. Whereas people who consume fewer alcohol per year tend to report themselves to be in "poor" or "fair" condition. We also noticed that there were outliers for all of the levels of self-reported health, with “good” health having the most outliers. Overall, we see a pattern of adults who report themselves as excellently healthy while drinking a significant amount of alcohol per year.
+The boxplots reveal that people who consumed more alcohol per year report themselves to be in "excellent" condition; this is noted by the higher median. Whereas people who consume less alcohol per year tend to report themselves to be in "poor" or "fair" condition. We also noticed that there were outliers for all of the levels of self-reported health, with “good” health having the most outliers. Overall, we see a pattern of adults who report themselves as excellently healthy while drinking a significant amount of alcohol per year.
 
 <br>
 
-**6. Correlogram**
+**6. Correlogram of Lifestyle Choices**
 
 ```{r}
 df <- nhanes_clean %>%
@@ -315,17 +318,28 @@ df <- nhanes_clean %>%
   dplyr::select(SleepHrsNight, AlcoholDay, SmokeNow, HealthGen) %>%
   na.omit()
 
-corrplot::corrplot(cor(df), method = "color", col = colorRampPalette(c("white","black"))(200), type = "upper")
+# Increase margins BEFORE plotting
+par(mar = c(3, 3, 6, 3))  # bottom, left, top, right margins
+
+corrplot::corrplot(
+  cor(df),
+  method = "color",
+  col = colorRampPalette(c("darkorange4", "white", "darkgreen"))(200),
+  type = "upper",
+  tl.col = "black", 
+  tl.cex = 0.9,     
+  tl.srt = 45          
+)
 ```
 <br>
 
-We have noticed that there is a correlation of 0.2 between alcohol consumption and smoking. This could indicate that people who consume drinks of alcohol during the day are more likely to be current smokers. In contrast, there is a -0.4 correlation between the persons’ average sleeping hours and their smoking habits. This can reinforce the findings of our violin plot, which mentions that people who smoke average the same amount of sleeping hours as non-smokers. However, it is important to remain skeptical about this claim due to those findings being unreliable.
+The correlgram shows that nearly all variables have very weak relationships, indicated by the pale color shading. The only noticeably positive correlation appears between alcohol consumption and smoking status, suggesting that people who drink more per day are somewhat more likely to be current smokers. A smaller positive relationship is also visible between sleep hours and general health, meaning individuals who rate their health higher tend to sleep slightly more. All other correlations are extremely close to zero, signifying little to no linear association in this subset of variables.
 
 <br>
 
 ### Q3: How do demographic factors influence lifestyle and health outcomes?
 
-To explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
+To further explore relationships between variables, we examined how socioeconomic status and lifestyle factors interact with one another and with health outcomes.
 
 **7.  Heatmap of average daily alcohol use by age group and marital status**
 
@@ -346,7 +360,7 @@ ggplot(
   aes(x = MaritalStatus, y = AgeGroup, fill = AvgAlcoholDay)
 ) +
   geom_tile() +
-  scale_fill_gradient(low = "indianred", high = "black") +  # 0 → red, high → black
+  scale_fill_gradient(low = "pink", high = "violetred4") +
   labs(
     title = "Average Daily Alcohol Use by Age Group and Marital Status",
     x = "Marital Status", y = "Age Group", fill = "Average Drinks Per Day"
@@ -356,7 +370,7 @@ ggplot(
 
 <br>
 
-This heatmap shows that adults aged 60 and older tend to consume the least amount of alcohol on a daily basis, while younger adults, especially those living with a partner, drink the most. Overall, alcohol consumption decreases with age, but relationship status does play a role as well.
+This heatmap shows a clear age-related pattern: younger adults tend to drink more alcohol per day than older adults, with the 60+ group consistently having the lowest averages. Across most age groups, individuals living with a partner report the highest alcohol intake, suggesting that relationship context may influence drinking behaviors. However, the overall differences are modest, and the heatmap mainly highlights general trends rather than strong contrasts.
 
 <br>
 
@@ -364,14 +378,17 @@ This heatmap shows that adults aged 60 and older tend to consume the least amoun
 
 ```{r}
 ggplot(nhanes_clean, aes(x = Age, y = SleepHrsNight, color = Gender)) +
-  geom_point(alpha = 0.5) +
-  facet_wrap(~MaritalStatus) 
-  labs(title = "Sleep Duration by Age, Gender, and Marital Status", x = "Age", y = "Sleep Hours/Night")
+  geom_jitter(alpha = 0.5, width = 0.5, height = 0.2) +   # noise
+  geom_smooth(method = "loess", se = TRUE) +              # smoothing line
+  facet_wrap(~MaritalStatus) +
+  labs(title = "Sleep Duration by Age, Gender, and Marital Status",
+       x = "Age (years)", y = "Sleep Hours per Night") +
+  theme_minimal()
 ```
 
 <br>
 
-This scatterplot highlights how married adults have the most diverse range of sleep hours, emphasizing that sleep is not related to marriage and varies per individual. Adults living with their partner and adults who have never married also have a diverse range of sleep hours, indicating that sleep is not related to the presence of a partner in life. Divorced and widowed adults recorded having less sleep as they aged, suggesting a correlation between missing a partner that once existed and missing sleep in old age.
+This scatterplot shows that married and never-married adults have the most observations in the dataset, so their sleep ranges appear more densely populated. Adults who are widowed or separated have fewer data points, making their patterns less visible. Overall, sleep duration varies widely across all marital statuses, with no clear pattern indicating that being married or having a partner strongly affects sleep. Some slight decreases in sleep may be seen for older adults who are widowed or separated, but these groups are underrepresented, so conclusions should be made cautiously.
 
 <br>
 
@@ -381,10 +398,10 @@ Throughout the project, we ran into some limitations: the dataset is oversampled
 
 ## Conclusion 
 
-Our analysis aimed to assess how socioeconomic status such as education, poverty, and income relate to lifestyle choices such as smoking, alcohol, and drug use. We also aimed to explore how those lifestyle choices related to health outcomes such as self-rated health level and sleep duration. Additionally, we sought out how demographic factors such as age, marital status, and gender, influences these lifestyle choices and health outcomes. 
+Our exploratory data analysis examined how socioeconomic status, lifestyle behaviors, and demographic factors relate to health outcomes such as self-rated health and sleep duration. We observed that lower-income and lower-education individuals were more likely to engage in smoking and hard drug use, while alcohol consumption varied in ways not strictly predicted by income, suggesting the influence of social and lifestyle factors.
 
-Once we cleaned the data generated visualizations, we observed clear links between socioeconomic status, lifestyle behaviors, and health outcomes. Individuals with lower income and education levels were more likely to engage in smoking and drug use, while alcohol consumption patterns appeared influenced by additional social factors. Lifestyle behaviors such as smoking and alcohol use showed a slight relationship to self-rated health and sleep duration, though not always in the expected direction. Demographic factors, including age and marital status, also shaped these relationships, particularly in alcohol use and sleep trends.
+We found that sleep duration and self-rated health showed weak but notable relationships with lifestyle behaviors, and demographic factors such as age and marital status contributed additional variability, particularly for older adults and underrepresented marital status groups. Visualizations such as violin plots, heatmaps, and correlograms helped reveal these patterns, although uneven sample sizes and data sparsity for certain groups limit the generalizability of these findings.
 
-Overall, our findings highlight the interplay between social and behavioral determinants of health. While socioeconomic advantages are generally associated with healthier habits, individual lifestyle choices and demographic contexts contribute meaningful variation. It is important to recognize the data limitations that hinder the accuracy of our findings. Further statistical modeling, preferably with less limitations, could help accurately clarify the causal pathways behind these associations.
+Overall, our results highlight the complex connections between social, behavioral, and demographic determinants of health. While higher socioeconomic status tends to align with healthier behaviors, individual lifestyle choices and demographic contexts introduce meaningful variation. Future analyses with more recent, representative, and comprehensive datasets, combined with statistical modeling, could better portray the relationships between these variables.
 
 <br>
