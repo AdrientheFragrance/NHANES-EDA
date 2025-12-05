@@ -3,6 +3,7 @@ title: "DATA 350: Project 1 - Exploratory Data Analysis Report"
 author: "Group 11: Ademir Ferreyra, Jay Nadkarni, Adrien Rozario"
 date: "10/17/2025"
 output: html_document
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -14,6 +15,7 @@ library(NHANES)
 library(forcats)
 library(viridis)
 library(corrplot)
+library(shiny)
 ```
 
 <br>
@@ -280,8 +282,50 @@ We found that lower-income groups are more than 20%  likely to be consuming hard
 **4. Violin plot of sleep duration by smoking status**
 
 ```{r}
-g <- ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight))
-g + geom_violin(fill = "lightblue2", alpha = 0.7) + stat_summary(fun = median, geom = "point", size = 3, color = "lightblue4") + labs(x = "Smoking Status", y = "Average Sleep Duration", title = "Sleep Duration Based on Smoking Status") 
+ui <- fluidPage(
+  selectInput("graphs",
+              choices = c("violin plot", "box plot"),
+              label = "select which graph you want to see"),
+  actionButton("select", "choose"),
+  
+  plotOutput("result"),
+  
+  textOutput("description")
+)
+
+server <- function(input, output, session){
+  vals <- eventReactive(input$select, {
+    if(input$graphs == "violin plot"){
+      ggplot(nhanes_clean, aes(x = SmokeNow, y = SleepHrsNight)) + geom_violin(fill = "lightblue2", alpha = 0.7) + 
+      stat_summary(fun = median, geom = "point", size = 3, color = "lightblue4") + labs(x = "Smoking Status", y = "Average Sleep Duration", title = "Sleep Duration Based on Smoking Status") 
+    } else if (input$graphs == "box plot") {
+      answered <- c("Poor","Fair", "Good", "Excellent")
+      ggplot(subset(nhanes_clean, HealthGen %in% answered), aes(x = HealthGen, y = AlcoholYear, fill = HealthGen)) + geom_boxplot(alpha = 0.7) + 
+      coord_flip() +  scale_fill_brewer(palette = "YlGnBu", direction = -1) +
+      labs(title = "Distribution of self-related health by alcohol consumption", x = "Self-Eeported Health", y = "Number of Days of Drinking Alcohol in the Past Year") + 
+      theme(legend.position = "none")
+    }
+  })
+  
+  output$result <- renderPlot({
+    vals()
+  })
+  
+  
+  output$description <- eventReactive(input$select, {
+    if (input$graphs == "violin plot"){
+      "This violin plot compares hours of sleep for smokers vs. non-smokers. Both groups average around 7 hours, but the non-smokers’ more irregular, wiggly violin suggests greater variation in their sleep patterns. Smokers show a slightly tighter distribution, suggesting more regular sleep patterns. Since both violins are uneven, the data may be limited and interpretation of the results should not be considered completely accurate.
+"
+    } else if (input$graphs == "box plot"){
+      "The boxplots reveal that people who consumed more alcohol per year report themselves to be in \"excellent\" condition; this is noted by the higher median. Whereas people who consume less alcohol per year tend to report themselves to be in \"poor\" or \"fair\" condition. We also noticed that there were outliers for all of the levels of self-reported health, with “good” health having the most outliers. Overall, we see a pattern of adults who report themselves as excellently healthy while drinking a significant amount of alcohol per year."
+    }
+      
+      
+  })
+  
+}
+
+shinyApp(ui, server)
 ```
 
 <br>
