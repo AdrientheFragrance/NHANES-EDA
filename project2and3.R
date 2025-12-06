@@ -1,4 +1,5 @@
-# app.R
+# Project 2 and 3
+
 library(shiny)
 library(dplyr)
 library(ggplot2)
@@ -51,7 +52,7 @@ nhanes_clean <- NHANESraw |>
 
 # UI
 ui <- navbarPage(
-  "NHANES Dashboard: How Socioeconomic Status, Lifestyle Choices, & Demographic Factors Influence Health",
+  "NHANES EDA Dashboard: The Impact of Socioeconomic Status, Lifestyle Choices, & Demographic Factors on Health",
   theme = shinytheme("flatly"),
   
   # Tab 1
@@ -76,7 +77,8 @@ ui <- navbarPage(
                plotlyOutput("t1_alcohol_income", height = "340px"),
                hr(),
                h4("Stacked bar plot of hard drug use by poverty level"),
-               plotlyOutput("t1_drug_poverty", height = "320px")
+               plotlyOutput("t1_drug_poverty", height = "320px"),
+               hr()
              )
            )
   ),
@@ -97,14 +99,15 @@ ui <- navbarPage(
              ),
              mainPanel(
                h3("Q2: How do lifestyle choices relate to self-rated health and sleep duration?"),
-               h4("Violin plot of sleep duration by smoking status)"),
+               h4("Violin plot of sleep duration by smoking status"),
                plotlyOutput("t2_sleep_smoke", height = "360px"),
                hr(),
                h4("Box plot of self-rated health by alcohol consumption"),
                plotlyOutput("t2_health_alc", height = "360px"),
                hr(),
-               h4("Correlogram of Lifestyle Choices"),
+               h4("Correlogram of lifestyle choices"),
                plotOutput("t2_corr", height = "360px"),
+               hr()
              )
            )
   ),
@@ -125,8 +128,8 @@ ui <- navbarPage(
                h4("Heatmap of average daily alcohol use by age group and marital status"),
                plotlyOutput("t3_heatmap", height = "340px"),
                hr(),
-               h4("Scatter Plot of Sleep vs Age (Faceted by Marital Status, Colored by Gender)"),
-               plotlyOutput("t3_sleep_facet", height = "420px")
+               h4("Scatter plot of sleep vs age (faceted by marital status, colored by gender)"),
+               plotlyOutput("t3_sleep_facet", height = "420px"),
              )
            )
   ),
@@ -135,16 +138,24 @@ ui <- navbarPage(
   tabPanel("Summary",
            sidebarLayout(
              sidebarPanel(
-               selectizeInput("summary_vars", "Choose variables (up to 5):", choices = names(nhanes_clean), multiple = TRUE, options = list(maxItems = 5)),
+               selectizeInput(
+                 "summary_vars", 
+                 "Choose variables (up to 5):", 
+                 choices = names(nhanes_clean), 
+                 multiple = TRUE, 
+                 options = list(maxItems = 5)
+               ),
                actionButton("go_sum", "Generate summary", class = "btn-primary"),
                hr(),
                downloadButton("download_all", "Download full cleaned CSV")
              ),
+             
              mainPanel(
                h4("Summary output"),
                verbatimTextOutput("summary_text"),
                hr(),
-               plotlyOutput("summary_plots")
+               h4("Distribution plots"),
+               plotlyOutput("summary_plots") 
              )
            )
   )
@@ -371,32 +382,51 @@ server <- function(input, output, session) {
     req(input$summary_vars)
     df <- nhanes_clean |> select(all_of(input$summary_vars))
     
-    # Render summary text
+    # Summary stats
     output$summary_text <- renderPrint({
-      summary(df)
+      lapply(df, function(x) {
+        if(is.numeric(x)) {
+          stats <- c(
+            Min = min(x, na.rm = TRUE),
+            `1st Qu.` = quantile(x, 0.25, na.rm = TRUE),
+            Median = median(x, na.rm = TRUE),
+            Mean = mean(x, na.rm = TRUE),
+            `3rd Qu.` = quantile(x, 0.75, na.rm = TRUE),
+            Max = max(x, na.rm = TRUE),
+            SD = sd(x, na.rm = TRUE)
+          )
+          return(stats)
+        } else {
+          # counts and proportions
+          tbl <- table(x)
+          prop <- round(prop.table(tbl) * 100, 1)
+          cbind(Count = as.vector(tbl), Percent = as.vector(prop))
+        }
+      })
     })
     
-    # Render distribution plots for all selected variables
+    # Distribution plots
     output$summary_plots <- renderPlotly({
-      if(ncol(df) == 0) return(NULL)
+      req(nrow(df) > 0)
       
       plot_list <- lapply(names(df), function(var) {
-        if(is.numeric(df[[var]])){
+        if(is.numeric(df[[var]])) {
           p <- ggplot(df, aes(x = .data[[var]])) +
-            geom_histogram(bins = 30, fill = "steelblue", color = "white") +
-            labs(title = var, x = var, y = "Count") +
+            geom_histogram(bins = 30, fill = "lightsteelblue", color = "steelblue4") +
+            labs(x = var, y = "Count") +
             theme_minimal()
         } else {
           p <- ggplot(df, aes(x = .data[[var]])) +
-            geom_bar(fill = "steelblue") +
-            labs(title = var, x = var, y = "Count") +
-            theme_minimal()
+            geom_bar(fill = "lightsteelblue") +
+            labs(x = var, y = "Count") +
+            theme_minimal() +
+            theme(axis.text.x = element_text(angle = 30, hjust = 1))
         }
         ggplotly(p)
       })
       
-      # Stack plots vertically
-      subplot(plot_list, nrows = length(plot_list), shareX = FALSE, titleX = TRUE, titleY = TRUE)
+      # Arrange multiple plots in one output using subplot
+      subplot(plot_list, nrows = ceiling(length(plot_list)/2), shareX = FALSE, shareY = FALSE, titleX = TRUE, titleY = TRUE)
     })
   })
   
