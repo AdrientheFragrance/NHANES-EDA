@@ -8,6 +8,7 @@ library(NHANES)
 library(corrplot)
 library(viridis)
 library(shinythemes)
+library(bslib)
 
 # Load and clean data
 data("NHANESraw")
@@ -49,7 +50,6 @@ nhanes_clean <- NHANESraw |>
   filter(SleepHrsNight <= 16, AlcoholDay <= 20) |>
   filter(!is.na(IncomeGroup), !is.na(PovertyGroup))
 
-
 # UI
 ui <- navbarPage(
   "NHANES EDA Dashboard: The Impact of Socioeconomic Status, Lifestyle Choices, & Demographic Factors on Health",
@@ -71,13 +71,13 @@ ui <- navbarPage(
              mainPanel(
                h3("Q1: How does socioeconomic status relate to smoking, alcohol, and drug use?"),
                h4("Bar plot of smoking rates by education level"),
-               plotlyOutput("t1_smoke_edu", height = "320px"),
+               plotlyOutput("t1_smoke_edu", height = "500px"),
                hr(),
                h4("Violin plot of alcohol consumption by income group"),
-               plotlyOutput("t1_alcohol_income", height = "340px"),
+               plotlyOutput("t1_alcohol_income", height = "500px"),
                hr(),
                h4("Stacked bar plot of hard drug use by poverty level"),
-               plotlyOutput("t1_drug_poverty", height = "320px"),
+               plotlyOutput("t1_drug_poverty", height = "500px"),
                hr()
              )
            )
@@ -100,13 +100,13 @@ ui <- navbarPage(
              mainPanel(
                h3("Q2: How do lifestyle choices relate to self-rated health and sleep duration?"),
                h4("Violin plot of sleep duration by smoking status"),
-               plotlyOutput("t2_sleep_smoke", height = "360px"),
+               plotlyOutput("t2_sleep_smoke", height = "500px"),
                hr(),
                h4("Box plot of self-rated health by alcohol consumption"),
-               plotlyOutput("t2_health_alc", height = "360px"),
+               plotlyOutput("t2_health_alc", height = "500px"),
                hr(),
                h4("Correlogram of lifestyle choices"),
-               plotOutput("t2_corr", height = "360px"),
+               plotOutput("t2_corr", height = "500px"),
                hr()
              )
            )
@@ -126,10 +126,10 @@ ui <- navbarPage(
              mainPanel(
                h3("Q3: How do demographic factors influence lifestyle and health outcomes?"),
                h4("Heatmap of average daily alcohol use by age group and marital status"),
-               plotlyOutput("t3_heatmap", height = "340px"),
+               plotlyOutput("t3_heatmap", height = "500px"),
                hr(),
                h4("Scatter plot of sleep vs age (faceted by marital status, colored by gender)"),
-               plotlyOutput("t3_sleep_facet", height = "420px"),
+               plotlyOutput("t3_sleep_facet", height = "500px"),
              )
            )
   ),
@@ -195,7 +195,7 @@ server <- function(input, output, session) {
       labs(x = "Education Level", y = "Proportion of Group (%)", fill = "Smokes") +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 35, hjust = 1))
-    ggplotly(p, tooltip = "text") |> layout(legend = list(orientation = "h", x = 0.2, y = -0.15))
+    ggplotly(p, tooltip = "text") |> layout(legend = list(x = 1.1, y = 0.5))
   })
   
   # Plot 1B
@@ -235,7 +235,7 @@ server <- function(input, output, session) {
       geom_col(position = "stack") +
       labs(x = "Poverty Group", y = "Proportion of Group (%)", fill = "Hard drug use") +
       theme_minimal()
-    ggplotly(p, tooltip = "text") |> layout(legend = list(orientation = "h", x = 0.2, y = -0.15))
+    ggplotly(p, tooltip = "text") |> layout(legend = list(x = 1.1, y = 0.5))
   })
   
   # Tab 2 
