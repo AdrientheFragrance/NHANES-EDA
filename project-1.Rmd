@@ -18,6 +18,8 @@ library(corrplot)
 
 <br>
 
+YouTube Video Presentation: https://youtu.be/7FHjDvoZiik
+
 ## Introduction
 
 From 2009 to 2012, the U.S. National Center for Health (NCHS) conducted The National Health and Nutrition Examination Survey (NHANES) with the goal of assessing public health trends, lifestyles, and illness risk factors across the U.S. population. For our exploratory data analysis, we will use the NHANESraw dataset from the NHANES R package, which was collected from the unweighted original survey responses from 20,293 participants.
@@ -314,10 +316,10 @@ The boxplots reveal that people who consumed more alcohol per year report themse
 ```{r}
 df <- nhanes_clean %>%
   dplyr::mutate(
-    mutate(SmokeNum = ifelse(SmokeNow == "Yes", 1, 0),
-          HealthNum = as.numeric(HealthGen))
+    SmokeNow = ifelse(SmokeNow == "Yes", 1, 0),
+    HealthGen = as.numeric(factor(HealthGen, levels = c("Poor","Fair","Good","Very good","Excellent")))
   ) %>%
-  dplyr::select(SleepHrsNight, AlcoholDay, SmokeNum, HealthNum) %>%
+  dplyr::select(SleepHrsNight, AlcoholDay, SmokeNow, HealthGen) %>%
   na.omit()
 
 # Increase margins BEFORE plotting
@@ -335,7 +337,7 @@ corrplot::corrplot(
 ```
 <br>
 
-The correlogram shows that people who smoked were most likely to also consume alcohol, with a positive correlation of around 0.4. Also, notice that smokenum and sleephrsnight had no correlation, which further justifies the finding of our violin plot, which showed no effect on sleep schedule between those who smoked and those who did not. Finally, the variable with the most positive correlations was healthnum. It showed that healthnum had some weak positive correlations with alcohol day (0.3) and smokenum (0.1), meaning that the days you have smoked or consumed alcohol influenced the way people self-reported their health. 
+This correlogram shows that people who smoked were most likely to also consume alcohol, with a positive correlation of around 0.4. Also, notice that smokenum and sleephrsnight had no correlation, which further justifies the finding of our violin plot: there was no effect on sleep schedule between those who smoked and those who did not. Finally, the variable with the most positive correlations is healthnum. Healthnum had some weak positive correlations with alcohol day (0.3) and smokenum (0.1), meaning that the days you have smoked or consumed alcohol influenced the way people self-reported their health. 
 
 <br>
 
