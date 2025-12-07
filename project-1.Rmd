@@ -1,6 +1,6 @@
 ---
-title: "DATA 350: Project 1 - Exploratory Data Analysis Report"
-author: "Group 11: Ademir Ferreyra, Jay Nadkarni, Adrien Rozario"
+title: "The Impact of Socioeconomic Status, Lifestyle Choices, & Demographic Factors on Health: An Exploratory Data Analysis Report"
+author: "DATA 350 Group 11: Ademir Ferreyra, Jay Nadkarni, Adrien Rozario"
 date: "10/17/2025"
 output: html_document
 ---
@@ -314,10 +314,10 @@ The boxplots reveal that people who consumed more alcohol per year report themse
 ```{r}
 df <- nhanes_clean %>%
   dplyr::mutate(
-    SmokeNow = ifelse(SmokeNow == "Yes", 1, 0),
-    HealthGen = as.numeric(factor(HealthGen, levels = c("Poor","Fair","Good","Very good","Excellent")))
+    mutate(SmokeNum = ifelse(SmokeNow == "Yes", 1, 0),
+          HealthNum = as.numeric(HealthGen))
   ) %>%
-  dplyr::select(SleepHrsNight, AlcoholDay, SmokeNow, HealthGen) %>%
+  dplyr::select(SleepHrsNight, AlcoholDay, SmokeNum, HealthNum) %>%
   na.omit()
 
 # Increase margins BEFORE plotting
@@ -335,7 +335,7 @@ corrplot::corrplot(
 ```
 <br>
 
-The correlogram shows that nearly all variables have very weak relationships, indicated by the pale color shading. The only noticeably positive correlation appears between alcohol consumption and smoking status, suggesting that people who drink more per day are somewhat more likely to be current smokers. A smaller positive relationship is also visible between sleep hours and general health, meaning individuals who rate their health higher tend to sleep slightly more. All other correlations are extremely close to zero, signifying little to no linear association in this subset of variables.
+The correlogram shows that people who smoked were most likely to also consume alcohol, with a positive correlation of around 0.4. Also, notice that smokenum and sleephrsnight had no correlation, which further justifies the finding of our violin plot, which showed no effect on sleep schedule between those who smoked and those who did not. Finally, the variable with the most positive correlations was healthnum. It showed that healthnum had some weak positive correlations with alcohol day (0.3) and smokenum (0.1), meaning that the days you have smoked or consumed alcohol influenced the way people self-reported their health. 
 
 <br>
 
