@@ -33,8 +33,8 @@ nhanes_clean <- NHANESraw |>
     AlcoholGroup = factor(AlcoholGroup, levels = c("None", "Light", "Moderate", "Heavy")),
     IncomeGroup = case_when(
       is.na(HHIncomeMid) ~ NA_character_,
-      HHIncomeMid < 25000 ~ "Low",
-      HHIncomeMid < 75000 ~ "Middle",
+      HHIncomeMid < 24000 ~ "Low",
+      HHIncomeMid < 74000 ~ "Middle",
       TRUE ~ "High"
     ),
     IncomeGroup = factor(IncomeGroup, levels = c("Low", "Middle", "High")),
@@ -52,11 +52,11 @@ nhanes_clean <- NHANESraw |>
 
 # UI
 ui <- navbarPage(
-  "NHANES EDA Dashboard: The Impact of Socioeconomic Status, Lifestyle Choices, & Demographic Factors on Health",
+  "The Impact of Socioeconomic Status, Lifestyle Choices, & Demographic Factors on Health: An Exploratory Data Analysis Dashboard",
   theme = shinytheme("flatly"),
   
   # Tab 1
-  tabPanel("Socioeconomic & Substance Use",
+  tabPanel("Socioeconomic Status & Lifestyle Choices",
            sidebarLayout(
              sidebarPanel(
                h4("Filters"),
@@ -71,20 +71,20 @@ ui <- navbarPage(
              mainPanel(
                h3("Q1: How does socioeconomic status relate to smoking, alcohol, and drug use?"),
                h4("Bar plot of smoking rates by education level"),
-               plotlyOutput("t1_smoke_edu", height = "500px"),
+               plotlyOutput("t1_smoke_edu", height = "400px"),
                hr(),
                h4("Violin plot of alcohol consumption by income group"),
-               plotlyOutput("t1_alcohol_income", height = "500px"),
+               plotlyOutput("t1_alcohol_income", height = "400px"),
                hr(),
                h4("Stacked bar plot of hard drug use by poverty level"),
-               plotlyOutput("t1_drug_poverty", height = "500px"),
+               plotlyOutput("t1_drug_poverty", height = "400px"),
                hr()
              )
            )
   ),
   
   # Tab 2
-  tabPanel("Lifestyle & Health",
+  tabPanel("Lifestyle Choices & Health Outcomes",
            sidebarLayout(
              sidebarPanel(
                h4("Filters"),
@@ -100,13 +100,13 @@ ui <- navbarPage(
              mainPanel(
                h3("Q2: How do lifestyle choices relate to self-rated health and sleep duration?"),
                h4("Violin plot of sleep duration by smoking status"),
-               plotlyOutput("t2_sleep_smoke", height = "500px"),
+               plotlyOutput("t2_sleep_smoke", height = "400px"),
                hr(),
                h4("Box plot of self-rated health by alcohol consumption"),
-               plotlyOutput("t2_health_alc", height = "500px"),
+               plotlyOutput("t2_health_alc", height = "400px"),
                hr(),
                h4("Correlogram of lifestyle choices"),
-               plotOutput("t2_corr", height = "500px"),
+               plotOutput("t2_corr", height = "400px"),
                hr()
              )
            )
@@ -114,7 +114,7 @@ ui <- navbarPage(
   
  
   # Tab 3
-  tabPanel("Demographics & Health",
+  tabPanel("Demographic Factors & Health Outcomes",
            sidebarLayout(
              sidebarPanel(
                h4("Filters"),
@@ -126,10 +126,10 @@ ui <- navbarPage(
              mainPanel(
                h3("Q3: How do demographic factors influence lifestyle and health outcomes?"),
                h4("Heatmap of average daily alcohol use by age group and marital status"),
-               plotlyOutput("t3_heatmap", height = "500px"),
+               plotlyOutput("t3_heatmap", height = "400px"),
                hr(),
                h4("Scatter plot of sleep vs age (faceted by marital status, colored by gender)"),
-               plotlyOutput("t3_sleep_facet", height = "500px"),
+               plotlyOutput("t3_sleep_facet", height = "400px"),
              )
            )
   ),
@@ -263,7 +263,7 @@ server <- function(input, output, session) {
       return(ggplotly(p))
     }
     
-    df_points <- sample_for_points(df_full, 1500)
+    df_points <- sample_for_points(df_full, 1400)
     
     p <- ggplot() +
       geom_violin(data = df_full, aes(x = SmokeNow, y = SleepHrsNight),
